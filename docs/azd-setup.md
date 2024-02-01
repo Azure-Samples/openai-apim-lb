@@ -19,7 +19,6 @@ After successful authentication, you can proceed with deploying your application
    - Use `azd up` to deploy your application. This command performs several actions:
      - **Builds your application**: Compiles and prepares your application for deployment.
      - **Provisions Azure resources**: Automatically creates and configures the necessary Azure services based on your project's requirements.
-     - **Deploys the application**: Uploads your application to Azure and starts it.
      - **Output**: The command provides a detailed output, including URLs and endpoints, for accessing your deployed application and related resources.
 
 ## Post-Deployment
