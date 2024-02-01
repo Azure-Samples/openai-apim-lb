@@ -31,7 +31,7 @@ In cases where multiple backends share the same priority and are all operational
 
 - **Manual Setup**: Step-by-step instructions for Azure API Management instance setup and policy configuration. [View Manual Setup](/docs/manual-setup.md)
 - **Azure Developer CLI (azd) Setup**: Guide for using the Azure Developer CLI for simplified deployment. [View AZD Setup](/docs/azd-setup.md)
-- **Understanding the Policy**: Detailed explanation of the API Management policies and their customization. [View How Policy Works](/docs/how-policy-works.md)
+- **Understanding the Policy**: Detailed explanation of the API Management policies and their customization. [View How Policy Works](/docs/how-the-policy-works.md)
 - **FAQ**: Common questions and answers about the setup and usage of this solution. [View FAQ](/docs/faq.md)
 
 ## Conclusion
