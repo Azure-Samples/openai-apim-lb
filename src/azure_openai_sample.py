@@ -1,8 +1,15 @@
+import os
+from dotenv import load_dotenv
 from openai import AzureOpenAI
 
+load_dotenv()
+
+apim_endpoint = os.getenv("APIM_ENDPOINT")
+apim_subscription_key = os.getenv("APIM_SUBSCRIPTION_KEY")
+
 client = AzureOpenAI(
-    azure_endpoint="https://<your_APIM_endpoint>.azure-api.net/<your_api_suffix>", #do not add "/openai" at the end here because this will be automatically added by this SDK
-    api_key="<your subscription key>",
+    azure_endpoint=apim_endpoint, #do not add "/openai" at the end here because this will be automatically added by this SDK
+    api_key=apim_subscription_key,
     api_version="2023-12-01-preview"
 )
 
