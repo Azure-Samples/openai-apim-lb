@@ -6,25 +6,6 @@
 
 # Name of the application.
 name: openai-apim-lb-sample
-# services:
-#   ## An example for a python API service.
-#   ## The service is named 'python-api'.
-#   ## The language is 'python'.
-#   ## The source code is located in the project (azure.yaml) directory.
-#   ## The service will be hosted on Azure App Service.
-#   python-api:
-#     language: python
-#     project: ./
-#     host: appservice
-#   ## An example for a NodeJS API, located in src/api.
-#   nodejs-api:
-#     language: js
-#     project: ./src/api
-#     host: appservice
-#   ## An example for a React front-end app.
-#   ## The src/react-app/build folder is where the app is built to after `npm run build`.
-#   react-web:
-#     language: js
-#     project: ./src/react-app
-#     host: appservice
-#     dist: build
+infra:
+  provider: bicep
+  

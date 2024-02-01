@@ -69,6 +69,9 @@ resource apimOpenaiApi 'Microsoft.ApiManagement/service/apis@2022-08-01' = {
     apiRevision: '1'
     displayName: 'Azure OpenAI Service API'
     subscriptionRequired: true
+    subscriptionKeyParameterNames: {
+      header: 'api-key'
+    }
     format: 'openapi+json'
     value: loadJsonContent('./openapi/openai-openapiv3.json')
     protocols: [
@@ -127,5 +130,33 @@ resource apimLogger 'Microsoft.ApiManagement/service/loggers@2021-12-01-preview'
   }
 }
 
+resource apimUser 'Microsoft.ApiManagement/service/users@2020-06-01-preview' = {
+  parent: apimService
+  name: 'myUser'
+  properties: {
+    firstName: 'My'
+    lastName: 'User'
+    email: 'myuser@example.com'
+    state: 'active'
+  }
+}
+
+resource apimSubscription 'Microsoft.ApiManagement/service/subscriptions@2020-06-01-preview' = {
+  parent: apimService
+  name: 'mySubscription'
+  properties: {
+    displayName: 'My Subscription'
+    state: 'active'
+    allowTracing: true
+    scope: '/apis/${apimOpenaiApi.name}'
+  }
+}
+
+@description('The name of the deployed API Management service.')
 output apimName string = apimService.name
+
+@description('The path for the OpenAI API in the deployed API Management service.')
 output apimOpenaiApiPath string = apimOpenaiApi.properties.path
+
+@description('Gateway URL for the deployed API Management resource.')
+output apimGatewayUrl string = apimService.properties.gatewayUrl

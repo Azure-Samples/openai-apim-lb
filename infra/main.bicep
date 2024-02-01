@@ -71,18 +71,6 @@ module monitoring './modules/monitor/monitoring.bicep' = {
   }
 }
 
-module apim './modules/apim/apim.bicep' = {
-  name: 'apim'
-  scope: resourceGroup
-  params: {
-    name: !empty(apimServiceName) ? apimServiceName : '${abbrs.apiManagementService}${resourceToken}'
-    location: location
-    tags: tags
-    applicationInsightsName: monitoring.outputs.applicationInsightsName
-    openAiUris: [for i in range(0, length(openAiInstances)): openAis[i].outputs.openAiEndpointUri]
-    managedIdentityName: managedIdentity.outputs.managedIdentityName
-  }
-}
 
 module openAis 'modules/ai/cognitiveservices.bicep' = [for (config,i) in items(openAiInstances): {
   name: '${config.value.name}-${resourceToken}'
@@ -112,5 +100,19 @@ module openAis 'modules/ai/cognitiveservices.bicep' = [for (config,i) in items(o
   }
 }]
 
+module apim './modules/apim/apim.bicep' = {
+  name: 'apim'
+  scope: resourceGroup
+  params: {
+    name: !empty(apimServiceName) ? apimServiceName : '${abbrs.apiManagementService}${resourceToken}'
+    location: location
+    tags: tags
+    applicationInsightsName: monitoring.outputs.applicationInsightsName
+    openAiUris: [for i in range(0, length(openAiInstances)): openAis[i].outputs.openAiEndpointUri]
+    managedIdentityName: managedIdentity.outputs.managedIdentityName
+  }
+}
+
 output APIM_NAME string = apim.outputs.apimName
 output APIM_AOI_PATH string = apim.outputs.apimOpenaiApiPath
+output APIM_GATEWAY_URL string = apim.outputs.apimGatewayUrl
