@@ -44,6 +44,5 @@ resource deployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01
   }
 }]
 
-
 output openAiName string = account.name
 output openAiEndpointUri string = '${account.properties.endpoint}openai/'

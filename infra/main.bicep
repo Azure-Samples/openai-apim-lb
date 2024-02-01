@@ -7,7 +7,7 @@ param environmentName string
 
 @minLength(1)
 @description('Primary location for all resources (filtered on available regions for Azure Open AI Service).')
-@allowed(['westeurope','southcentralus','australiaeast', 'canadaeast', 'eastus', 'eastus2', 'francecentral', 'japaneast', 'northcentralus', 'swedencentral', 'switzerlandnorth', 'uksouth'])
+@allowed([ 'westeurope', 'southcentralus', 'australiaeast', 'canadaeast', 'eastus', 'eastus2', 'francecentral', 'japaneast', 'northcentralus', 'swedencentral', 'switzerlandnorth', 'uksouth' ])
 param location string
 
 //Leave blank to use default naming conventions
@@ -71,8 +71,7 @@ module monitoring './modules/monitor/monitoring.bicep' = {
   }
 }
 
-
-module openAis 'modules/ai/cognitiveservices.bicep' = [for (config,i) in items(openAiInstances): {
+module openAis 'modules/ai/cognitiveservices.bicep' = [for (config, i) in items(openAiInstances): {
   name: '${config.value.name}-${resourceToken}'
   scope: resourceGroup
   params: {

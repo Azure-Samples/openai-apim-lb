@@ -80,7 +80,7 @@ resource apimOpenaiApi 'Microsoft.ApiManagement/service/apis@2022-08-01' = {
   }
 }
 
-resource openAiBackends 'Microsoft.ApiManagement/service/backends@2021-08-01' = [for (openAiUri,i) in openAiUris:{
+resource openAiBackends 'Microsoft.ApiManagement/service/backends@2021-08-01' = [for (openAiUri, i) in openAiUris: {
   name: '${openAiApiBackendId}-${i}'
   parent: apimService
   properties: {
