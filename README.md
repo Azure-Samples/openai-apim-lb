@@ -38,5 +38,12 @@ In cases where multiple backends share the same priority and are all operational
 
 This smart load balancing solution effectively addresses the challenges posed by API limit constraints in Azure OpenAI. By implementing the strategies outlined in the provided documentation, you can ensure efficient and reliable application performance, leveraging the full potential of your OpenAI and Azure API Management resources.
 
+
+## Productionizing the Solution
+
+Transitioning to production requires careful consideration of security, performance, and cost. For a detailed guide on productizing this solution, including security enhancements, performance optimization, and continuous monitoring.
+- [Productionizing this solution](/docs/productionizing.md).
+
+
 ## :link: Related articles
 - A more detailed and user-friendly step-by-step article by [csiebler](https://github.com/csiebler): [Smart Load-Balancing for Azure OpenAI with Azure API Management](https://clemenssiebler.com/posts/smart-loadbalancing-for-azure-openai-with-api-management/)
