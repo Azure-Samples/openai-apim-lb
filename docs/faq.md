@@ -7,11 +7,11 @@ You just need to copy the contents of the [policy XML](apim-policy.xml), modify 
 ### What happens if all backends are throttling at the same time?
 In that case, the policy will return the first backend in the list (line 158) and will forward the request to it. Since that endpoint is throttling, API Management will return the same 429 error as the OpenAI backend. That's why it is **still important for your client application/SDKs to have a logic to handle retries**, even though it should be much less frequent.
 
-### I am updating the backend list in the policies but it seems to keep the old list
+### I am updating the backend list in the policies but it seems to keep the old list.
 That is because the policy is coded to only create the backend list after it expires in the internal cache, after 60 seconds. That means if your API Management instance is getting at least one request every 60 seconds, that cache will not expire to pick up your latest changes. You can either manually remove the cached "listBackends" key by using [cache-remove-key](https://learn.microsoft.com/azure/api-management/cache-remove-value-policy) policy or call its Powershell operation to [remove a cache](https://learn.microsoft.com/powershell/module/az.apimanagement/remove-azapimanagementcache?view=azps-10.4.1)
 
 ### Reading the policy logic is hard for me. Can you describe it in plain english?
-Sure. That's how it works when API Management gets a new incoming request:
+Sure. This is how it works when API Management gets a new incoming request:
 
 1. From the list of backends defined in the JSON array, it will pick one backend using this logic:
    1. Selects the highest priority (lower number) that is not currently throttling. If it finds more than one healthy backend with the same priority, it will randomly select one of them

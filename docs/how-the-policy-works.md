@@ -57,7 +57,7 @@ The `listBackends` variable is crucial as it defines the backends and their prio
 
 ### Authentication Managed Identity
 
-This section of the policy injects the Azure Managed Identity from your API Management instance as an HTTP header towards OpenAI. This method is recommended for ease of API key management across different backends. 
+This section of the policy injects the Azure Managed Identity from your API Management instance as an HTTP header for OpenAI. This method is recommended for ease of API key management across different backends. 
 ```xml
 <authentication-managed-identity resource="https://cognitiveservices.azure.com" output-token-variable-name="msi-access-token" ignore-error="false" />
 <set-header name="Authorization" exists-action="override">

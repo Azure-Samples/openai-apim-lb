@@ -6,7 +6,7 @@ This document outlines the steps to manually set up smart load balancing for Ope
 
 ### Step 1: Provision Azure API Management Instance
 - Provision an [Azure API Management instance](https://learn.microsoft.com/en-us/azure/api-management/get-started-create-service-instance).
-- Ensure enabling `Managed Identity` during provisioning.
+- Ensure that you check the Status box enabling `Managed Identity` during provisioning.
 
 ### Step 2: Provision Azure OpenAI Service Instances
 - Provision your Azure OpenAI Service instances.

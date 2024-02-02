@@ -12,7 +12,7 @@
                     // -------------------------------------------------
                     // "url":          Your backend url
                     // "priority":     Lower value means higher priority over other backends. 
-                    //                 If you have more one or more Priority 1 backends, they will always be used instead
+                    //                 If you have more than one Priority 1 backends, they will always be used instead
                     //                 of Priority 2 or higher. Higher values backends will only be used if your lower values (top priority) are all throttling.
                     // "isThrottling": Indicates if this endpoint is returning 429 (Too many requests) currently
                     // "retryAfter":   We use it to know when to mark this endpoint as healthy again after we received a 429 response

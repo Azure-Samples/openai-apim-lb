@@ -11,13 +11,28 @@ param environmentName string
 param location string
 
 //Leave blank to use default naming conventions
+
+@description('Name of the resource group. Leave blank to use default naming conventions.')
 param resourceGroupName string = ''
+
+@description('Name of the identity. Leave blank to use default naming conventions.')
 param identityName string = ''
+
+@description('Name of the API Management service. Leave blank to use default naming conventions.')
 param apimServiceName string = ''
+
+@description('Name of the Log Analytics workspace. Leave blank to use default naming conventions.')
 param logAnalyticsName string = ''
+
+@description('Name of the Application Insights dashboard. Leave blank to use default naming conventions.')
 param applicationInsightsDashboardName string = ''
+
+@description('Name of the Application Insights resource. Leave blank to use default naming conventions.')
 param applicationInsightsName string = ''
 
+// You can add more OpenAI instances by adding more objects to the openAiInstances object
+// Then update the apim policy xml to include the new instances
+@description('Object containing OpenAI instances. You can add more instances by adding more objects to this parameter.')
 param openAiInstances object = {
   openAi1: {
     name: 'openai1'
@@ -33,14 +48,26 @@ param openAiInstances object = {
   }
 }
 
+@description('Version of the Chat GPT model.')
 param chatGptModelVersion string = '0613'
 
+@description('SKU name for OpenAI.')
+param openAiSkuName string = 'S0'
+
+@description('Name of the Chat GPT deployment.')
+param chatGptDeploymentName string = 'chat'
+
+@description('Name of the Chat GPT model.')
+param chatGptModelName string = 'gpt-35-turbo'
+
+@description('Tags to be applied to resources.')
+param tags object = { 'azd-env-name': environmentName }
+
+// Load abbreviations from JSON file
 var abbrs = loadJsonContent('./abbreviations.json')
+// Generate a unique token for resources
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
-var openAiSkuName = 'S0'
-var chatGptDeploymentName = 'chat'
-var chatGptModelName = 'gpt-35-turbo'
-var tags = { 'azd-env-name': environmentName }
+
 
 // Organize resources in a resource group
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
