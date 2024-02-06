@@ -1,3 +1,14 @@
+---
+page_type: sample
+languages:
+- bicep
+- xml
+- yaml
+products:
+- azure-api-management	
+- azure-openai
+---
+
 # :rocket: Smart Load Balancing for OpenAI Endpoints and Azure API Management
 
 ![Smart APIM load balancing](./images/intro-loadbalance.png)
