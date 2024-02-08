@@ -4,24 +4,24 @@ This Python sample demonstrates how to use the Azure OpenAI SDK to interact with
 
 ## Sample Code
 
-    ```python
-    from openai import AzureOpenAI
+```python
+from openai import AzureOpenAI
 
-    client = AzureOpenAI(
-        azure_endpoint="https://<your_APIM_endpoint>.azure-api.net/<your_api_suffix>", #do not add "/openai" at the end here because this will be automatically added by this SDK
-        api_key="<your subscription key>",
-        api_version="2023-12-01-preview"
-    )
+client = AzureOpenAI(
+   azure_endpoint="https://<your_APIM_endpoint>.azure-api.net/<your_api_suffix>", #do not add "/openai" at the end here because this will be automatically added by this SDK
+   api_key="<your subscription key>",
+   api_version="2023-12-01-preview"
+)
 
-    response = client.chat.completions.create(
-        model="<your_deployment_name>",
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": "Does Azure OpenAI support customer managed keys?"}
-        ]
-    )
-    print(response)
-    ```
+response = client.chat.completions.create(
+   model="<your_deployment_name>",
+   messages=[
+      {"role": "system", "content": "You are a helpful assistant."},
+      {"role": "user", "content": "Does Azure OpenAI support customer managed keys?"}
+   ]
+)
+print(response)
+```
 
 ## Usage Instructions
 

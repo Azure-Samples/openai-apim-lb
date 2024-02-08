@@ -4,6 +4,13 @@
 
 Azure Developer CLI (azd) is a command-line tool designed to simplify the development and deployment of applications on Azure. It provides a streamlined and consistent workflow for developers, making it easier to build, test, and deploy applications across various Azure services. This section will guide you through using azd for authentication and deploying your application.
 
+## Install AZD
+
+To get started with Azure Developer CLI, you need to install the tool on your local machine. The installation process is straightforward and has instructions for various operating systems:
+
+[Install Azure Developer CLI](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd)
+
+
 ## Authentication with Azure Developer CLI
 
 Before you begin deploying your application, you need to authenticate with Azure. The Azure Developer CLI provides a simple command for this:
@@ -25,6 +32,7 @@ After successful authentication, you can proceed with deploying your application
 
 Once the deployment is complete, you can access the application. Azure Developer CLI also integrates with Azure Monitor and Azure Application Insights, allowing you to monitor the performance and health of your application directly from the command line.
 
-## Conclusion
+## Sample Code
 
-Azure Developer CLI offers a unified and simplified approach to Azure development and deployment. By leveraging `azd auth login` for authentication and `azd up` for deployment, developers can efficiently manage their Azure-based applications, significantly reducing the complexity and time involved in navigating through multiple Azure services and configurations.
+- Test the setup with appropriate code (e.g., using the OpenAI Python SDK).
+- [Example code](/docs/sample-code.md)
