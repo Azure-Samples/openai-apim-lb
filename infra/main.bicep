@@ -48,14 +48,23 @@ param openAiInstances object = {
   }
 }
 
-@description('Version of the Chat GPT model.')
-param chatGptModelVersion string = '0613'
-
 @description('SKU name for OpenAI.')
 param openAiSkuName string = 'S0'
 
+@description('Version of the Chat GPT model.')
+param chatGptModelVersion string = '0613'
+
 @description('Name of the Chat GPT deployment.')
 param chatGptDeploymentName string = 'chat'
+
+@description('Name of the Chat GPT model.')
+param embeddingGptModelName string = 'text-embedding-ada-002'
+
+@description('Version of the Chat GPT model.')
+param embeddingGptModelVersion string = '2'
+
+@description('Name of the Chat GPT deployment.')
+param embeddingGptDeploymentName string = 'embedding'
 
 @description('Name of the Chat GPT model.')
 param chatGptModelName string = 'gpt-35-turbo'
@@ -120,6 +129,18 @@ module openAis 'modules/ai/cognitiveservices.bicep' = [for (config, i) in items(
         }
         scaleSettings: {
           scaleType: 'Standard'
+        }
+      }
+      {
+        name: embeddingGptDeploymentName
+        model: {
+          format: 'OpenAI'
+          name: embeddingGptModelName
+          version: embeddingGptModelVersion
+        }
+        sku: {
+          name: 'Standard'
+          capacity: 1
         }
       }
     ]
