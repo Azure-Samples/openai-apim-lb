@@ -13,9 +13,9 @@ param skuCount int = 1
 param applicationInsightsName string
 param openAiUris array
 param managedIdentityName string
-param clientAppId string = ''
-param tenantId string = ''
-param audience string = ''
+param clientAppId string = ' '
+param tenantId string = tenant().tenantId
+param audience string = 'https://cognitiveservices.azure.com/.default'
 
 var openAiApiBackendId = 'openai-backend'
 var openAiApiUamiNamedValue = 'uami-client-id'
