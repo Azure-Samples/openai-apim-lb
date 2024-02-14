@@ -193,9 +193,12 @@
     <outbound>
         <base />
         <!-- This will return the used backend URL in the HTTP header response. Remove it if you don't want to expose this data -->
-        <!-- <set-header name="x-openai-backendurl" exists-action="override">
-            <value>@(context.Variables.GetValueOrDefault<string>("backendUrl", "none"))</value>
-        </set-header> -->
+        <!--
+        <set-header name="x-openai-backend-id" exists-action="override">
+            <value>@(context.Variables.GetValueOrDefault<string>("backend-id", "none"))</value>
+        </set-header>
+        -->
+
     </outbound>
     <on-error>
         <base />

@@ -1,2 +1,7 @@
 openai
 python-dotenv
+
+# azure-identity
+# langchain==0.1.5
+# langchain-openai==0.0.5
+# openai==1.11.1

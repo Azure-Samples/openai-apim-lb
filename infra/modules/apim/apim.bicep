@@ -13,9 +13,9 @@ param skuCount int = 1
 param applicationInsightsName string
 param openAiUris array
 param managedIdentityName string
-param clientAppId string
-param tenantId string
-param audience string
+param clientAppId string = ''
+param tenantId string = ''
+param audience string = ''
 
 var openAiApiBackendId = 'openai-backend'
 var openAiApiUamiNamedValue = 'uami-client-id'
@@ -112,7 +112,7 @@ resource apimOpenaiApiUamiNamedValue 'Microsoft.ApiManagement/service/namedValue
   }
 }
 
-resource apimOpenaiApiUamiNamedValue 'Microsoft.ApiManagement/service/namedValues@2022-08-01' = {
+resource apiopenAiApiEntraNamedValue 'Microsoft.ApiManagement/service/namedValues@2022-08-01' = {
   name: openAiApiEntraNamedValue
   parent: apimService
   properties: {
@@ -121,7 +121,7 @@ resource apimOpenaiApiUamiNamedValue 'Microsoft.ApiManagement/service/namedValue
     value: entraAuth
   }
 }
-resource apimOpenaiApiUamiNamedValue 'Microsoft.ApiManagement/service/namedValues@2022-08-01' = if (entraAuth) {
+resource apiopenAiApiClientNamedValue 'Microsoft.ApiManagement/service/namedValues@2022-08-01' = if (entraAuth) {
   name: openAiApiClientNamedValue
   parent: apimService
   properties: {
@@ -130,7 +130,7 @@ resource apimOpenaiApiUamiNamedValue 'Microsoft.ApiManagement/service/namedValue
     value: clientAppId
   }
 }
-resource apimOpenaiApiUamiNamedValue 'Microsoft.ApiManagement/service/namedValues@2022-08-01' = if (entraAuth) {
+resource apiopenAiApiTenantNamedValue 'Microsoft.ApiManagement/service/namedValues@2022-08-01' = if (entraAuth) {
   name: openAiApiTenantNamedValue
   parent: apimService
   properties: {
@@ -139,7 +139,7 @@ resource apimOpenaiApiUamiNamedValue 'Microsoft.ApiManagement/service/namedValue
     value: tenantId
   }
 }
-resource apimOpenaiApiUamiNamedValue 'Microsoft.ApiManagement/service/namedValues@2022-08-01' = if (entraAuth) {
+resource apimOpenaiApiAudienceiNamedValue 'Microsoft.ApiManagement/service/namedValues@2022-08-01' = if (entraAuth) {
   name: openAiApiAudienceNamedValue
   parent: apimService
   properties: {

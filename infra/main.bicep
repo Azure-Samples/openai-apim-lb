@@ -74,9 +74,9 @@ param tags object = { 'azd-env-name': environmentName }
 
 @description('Should Entra ID validation be enabled')
 param entraAuth bool = false
-param entraTenantId string 
-param entraClientId string 
-param entraAudience string  
+param entraTenantId string = ''
+param entraClientId string = ''
+param entraAudience string = '' 
 
 
 // Load abbreviations from JSON file
@@ -165,7 +165,7 @@ module apim './modules/apim/apim.bicep' = {
     openAiUris: [for i in range(0, length(openAiInstances)): openAis[i].outputs.openAiEndpointUri]
     managedIdentityName: managedIdentity.outputs.managedIdentityName
     entraAuth: entraAuth
-    clientAppId: entraAuth ? entraClienttId : null 
+    clientAppId: entraAuth ? entraClientId : null 
     tenantId: entraAuth ? entraTenantId : null
     audience: entraAuth ? entraAudience : null
   }
