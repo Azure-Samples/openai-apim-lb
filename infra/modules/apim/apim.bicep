@@ -121,7 +121,7 @@ resource apiopenAiApiEntraNamedValue 'Microsoft.ApiManagement/service/namedValue
     value: entraAuth
   }
 }
-resource apiopenAiApiClientNamedValue 'Microsoft.ApiManagement/service/namedValues@2022-08-01' = if (entraAuth) {
+resource apiopenAiApiClientNamedValue 'Microsoft.ApiManagement/service/namedValues@2022-08-01' = {
   name: openAiApiClientNamedValue
   parent: apimService
   properties: {
@@ -130,7 +130,7 @@ resource apiopenAiApiClientNamedValue 'Microsoft.ApiManagement/service/namedValu
     value: clientAppId
   }
 }
-resource apiopenAiApiTenantNamedValue 'Microsoft.ApiManagement/service/namedValues@2022-08-01' = if (entraAuth) {
+resource apiopenAiApiTenantNamedValue 'Microsoft.ApiManagement/service/namedValues@2022-08-01' = {
   name: openAiApiTenantNamedValue
   parent: apimService
   properties: {
@@ -139,7 +139,7 @@ resource apiopenAiApiTenantNamedValue 'Microsoft.ApiManagement/service/namedValu
     value: tenantId
   }
 }
-resource apimOpenaiApiAudienceiNamedValue 'Microsoft.ApiManagement/service/namedValues@2022-08-01' = if (entraAuth) {
+resource apimOpenaiApiAudienceiNamedValue 'Microsoft.ApiManagement/service/namedValues@2022-08-01' =  {
   name: openAiApiAudienceNamedValue
   parent: apimService
   properties: {
