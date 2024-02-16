@@ -1,6 +1,7 @@
 param name string
 param location string = resourceGroup().location
 param tags object = {}
+param entraAuth bool = false
 
 @minLength(1)
 param publisherEmail string = 'noreply@microsoft.com'
@@ -12,9 +13,16 @@ param skuCount int = 1
 param applicationInsightsName string
 param openAiUris array
 param managedIdentityName string
+param clientAppId string = ' '
+param tenantId string = tenant().tenantId
+param audience string = 'https://cognitiveservices.azure.com/.default'
 
 var openAiApiBackendId = 'openai-backend'
 var openAiApiUamiNamedValue = 'uami-client-id'
+var openAiApiEntraNamedValue = 'entra-auth'
+var openAiApiClientNamedValue = 'client-id'
+var openAiApiTenantNamedValue = 'tenant-id'
+var openAiApiAudienceNamedValue = 'audience'
 
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = {
   name: applicationInsightsName
@@ -68,7 +76,7 @@ resource apimOpenaiApi 'Microsoft.ApiManagement/service/apis@2022-08-01' = {
     path: 'openai'
     apiRevision: '1'
     displayName: 'Azure OpenAI Service API'
-    subscriptionRequired: true
+    subscriptionRequired: entraAuth ? false:true 
     subscriptionKeyParameterNames: {
       header: 'api-key'
     }
@@ -104,7 +112,44 @@ resource apimOpenaiApiUamiNamedValue 'Microsoft.ApiManagement/service/namedValue
   }
 }
 
-resource openaiApiPolicy 'Microsoft.ApiManagement/service/apis/policies@2022-08-01' = {
+resource apiopenAiApiEntraNamedValue 'Microsoft.ApiManagement/service/namedValues@2022-08-01' = {
+  name: openAiApiEntraNamedValue
+  parent: apimService
+  properties: {
+    displayName: openAiApiEntraNamedValue
+    secret: false
+    value: entraAuth
+  }
+}
+resource apiopenAiApiClientNamedValue 'Microsoft.ApiManagement/service/namedValues@2022-08-01' = {
+  name: openAiApiClientNamedValue
+  parent: apimService
+  properties: {
+    displayName: openAiApiClientNamedValue
+    secret: true
+    value: clientAppId
+  }
+}
+resource apiopenAiApiTenantNamedValue 'Microsoft.ApiManagement/service/namedValues@2022-08-01' = {
+  name: openAiApiTenantNamedValue
+  parent: apimService
+  properties: {
+    displayName: openAiApiTenantNamedValue
+    secret: true
+    value: tenantId
+  }
+}
+resource apimOpenaiApiAudienceiNamedValue 'Microsoft.ApiManagement/service/namedValues@2022-08-01' =  {
+  name: openAiApiAudienceNamedValue
+  parent: apimService
+  properties: {
+    displayName: openAiApiAudienceNamedValue
+    secret: true
+    value: audience
+  }
+}
+
+resource openaiApiPolicy 'Microsoft.ApiManagement/service/apis/policies@2022-08-01' =  {
   name: 'policy'
   parent: apimOpenaiApi
   properties: {

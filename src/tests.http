@@ -1,0 +1,52 @@
+
+###  Test the OpenAI chat API ( no auth required )
+###################################################
+@api-key = {{$dotenv %APIM_SUBSCRIPTION_KEY}}
+@apim-url = {{$dotenv %APIM_ENDPOINT}}
+
+POST {{apim-url}}/openai/deployments/chat/chat/completions?api-version=2023-07-01-preview HTTP/1.1
+Content-Type: application/json
+api-key: {{api-key}}
+
+
+{ 
+    "messages": [
+        {"role":"system","content":"Helpful assistant"},
+        {"role":"user","content":"Does Azure OpenAI support customer managed keys"}
+    ],
+    "max_tokens": 800,
+   "temperature": 0.5
+}
+
+############################################
+## Test the OpenAI chat API ( with auth required )
+###########################################
+# @name getToken 
+###########################################
+POST https://login.microsoftonline.com/{{$dotenv %AZURE_TENANT_ID}}/oauth2/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials
+&resource={{$dotenv %AZURE_AUDIENCE}}
+&client_id={{$dotenv %AZURE_CLIENT_ID}}
+&client_secret={{$dotenv %AZURE_CLIENT_SECRET}}
+
+### Capture access token from getToken request
+@authToken = {{getToken.response.body.access_token}}
+@apim-url = {{$dotenv %APIM_ENDPOINT}}
+
+############################################
+###   Completion OpenaiChat 
+############################################
+POST {{apim-url}}/openai/deployments/chat/chat/completions?api-version=2023-07-01-preview HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{ 
+    "messages": [
+        {"role":"system","content":"Helpful assistant"},
+        {"role":"user","content":"Does Azure OpenAI support customer managed keys"}
+    ],
+    "max_tokens": 800,
+    "temperature": 0.5
+}

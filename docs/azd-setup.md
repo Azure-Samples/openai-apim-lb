@@ -36,3 +36,26 @@ Once the deployment is complete, you can access the application. Azure Developer
 
 - Test the setup with appropriate code (e.g., using the OpenAI Python SDK).
 - [Example code](/docs/sample-code.md)
+
+
+## Enable Entra Authentication
+To enable [Protect an API in Azure APIM with Entra ID](https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-protect-backend-with-aad), create App Registration set the `AZURE_ENTRA_AUTH` variable to true before running `azd up`
+
+- Create App registration follow steps [Register an application in Microsoft Entra ID to represent the API](https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-protect-backend-with-aad#register-an-application-in-microsoft-entra-id-to-represent-the-api)
+
+- Set following AZD variables:
+1. Run `azd env set AZURE_ENTRA_AUTH true`
+1. Run `azd env set AZURE_CLIENT_ID  <apd id>`
+1. Run `azd env set AZURE_TENANT_ID  <tenant id>`
+1. Run `azd env set AZURE_AUDIENCE <app id URI>`
+
+1. Run `azd up`
+
+## Sample ENTRA testing code
+
+- [Example HTTP level code](/src/tests.http)
+- [Example Python OpenAI SDK + ENTRA](/src/azure_openai_aad.py)
+- [Example Langchain SDK + ENTRA](/src/azure_openai_aad_langchain.py)
+
+For all examples fill in values in `.env` file, sample `.env.sample` is provided in `src` folder
+
