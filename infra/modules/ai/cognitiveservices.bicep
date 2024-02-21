@@ -7,7 +7,7 @@ param kind string = 'OpenAI'
 param sku object = {
   name: 'S0'
 }
-param deploymentCapacity int = 1
+param deploymentCapacity int = 2
 
 resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' existing = {
   name: managedIdentityName
