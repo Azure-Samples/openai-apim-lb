@@ -158,6 +158,10 @@ resource openaiApiPolicy 'Microsoft.ApiManagement/service/apis/policies@2022-08-
   }
   dependsOn: [
     openAiBackends
+    apiopenAiApiClientNamedValue
+    apiopenAiApiEntraNamedValue
+    apimOpenaiApiAudienceiNamedValue
+    apiopenAiApiTenantNamedValue
   ]
 }
 
