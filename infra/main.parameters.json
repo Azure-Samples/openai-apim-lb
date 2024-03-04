@@ -19,6 +19,12 @@
     },
     "entraAudience": {
       "value": "${AZURE_AUDIENCE}"
+    },
+    "deploymentCapacity": {
+      "value": "${OPENAI_CAPACITY}",
+      "metadata": {
+        "description": "The OpenAI endpoints capacity (in thousands of tokens per minute)."
+      }
     }
   }
 }
