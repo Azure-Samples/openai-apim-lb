@@ -69,6 +69,9 @@ param embeddingGptDeploymentName string = 'embedding'
 @description('Name of the Chat GPT model.')
 param chatGptModelName string = 'gpt-35-turbo'
 
+@description('The OpenAI endpoints capacity (in thousands of tokens per minute)')
+param deploymentCapacity int = 30
+
 @description('Tags to be applied to resources.')
 param tags object = { 'azd-env-name': environmentName }
 
@@ -125,7 +128,7 @@ module openAis 'modules/ai/cognitiveservices.bicep' = [for (config, i) in items(
     sku: {
       name: openAiSkuName
     }
-    deploymentCapacity: 1
+    deploymentCapacity: deploymentCapacity
     deployments: [
       {
         name: chatGptDeploymentName
@@ -147,7 +150,7 @@ module openAis 'modules/ai/cognitiveservices.bicep' = [for (config, i) in items(
         }
         sku: {
           name: 'Standard'
-          capacity: 1
+          capacity: deploymentCapacity
         }
       }
     ]
