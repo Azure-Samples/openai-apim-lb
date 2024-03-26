@@ -2,6 +2,8 @@
 
 # Name of the application.
 name: openai-apim-lb-sample
+metadata:
+  template: openai-apim-lb-sample
 infra:
   provider: bicep
   
