@@ -11,4 +11,4 @@ For help and questions about using this project, please use GitHub Issues and ta
 
 ## Microsoft Support Policy
 
-Support for this **PROJECT or PRODUCT** is limited to the resources listed above.
+Support for this project is limited to the resources listed above. This project is **not** covered by the [Microsoft Azure support policy](https://azure.microsoft.com/en-us/support/).
