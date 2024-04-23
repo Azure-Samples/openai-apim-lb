@@ -31,6 +31,12 @@ Our solution stands out in its intelligent handling of OpenAI throttling. It is 
 
 - **No Delay in Backend Switching**: Our policy ensures immediate switching to different endpoints without delay, contrary to many existing API Management sample policies that introduce waiting intervals.
 
+- **Model-based routing**
+
+- **Multi-region support**
+
+- **Safe deployment praciticies**
+
 ### Scenarios and Priority Groups:
 
 - **Provisioned Throughput Deployment (PTU)**: Set as Priority 1 to utilize its capacity first, given its fixed pricing model.
