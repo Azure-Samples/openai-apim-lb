@@ -31,13 +31,17 @@ Our solution stands out in its intelligent handling of OpenAI throttling. It is 
 
 - **No Delay in Backend Switching**: Our policy ensures immediate switching to different endpoints without delay, contrary to many existing API Management sample policies that introduce waiting intervals.
 
-- **Model-based routing**
+- **Model-based routing**: Using deployment names to route traffic to different models, enabling seamless A/B testing and model comparison.
 
-- **Multi-region support**
+- **Multi-region support**: Default policy include a default region and can be extended to support multiple regions.
 
-- **Safe deployment praciticies**
+- **Safe deployment practices**: Using APIM API revisions to ensure safe deployment of new configurations with the ability to rollback.
 
-### Scenarios and Priority Groups:
+- **Using gateway keys**: With APIM subscription keys, granular RBAC access to Azure OpenAI models/instances will be managed through APIM (no Azure OpenAI master keys in the client).
+
+### Scenarios and Model Priority Groups:
+
+Within a specific model, you can leverage the following:
 
 - **Provisioned Throughput Deployment (PTU)**: Set as Priority 1 to utilize its capacity first, given its fixed pricing model.
 - **Fallback S0 Tier Deployments**: Spread across different regions, these are set as Priority 2 and beyond, used when PTU is at capacity.
