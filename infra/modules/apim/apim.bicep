@@ -80,8 +80,8 @@ resource apimOpenaiApi 'Microsoft.ApiManagement/service/apis@2022-08-01' = {
     subscriptionKeyParameterNames: {
       header: 'api-key'
     }
-    format: 'openapi+json'
-    value: loadJsonContent('./openapi/openai-openapiv3.json')
+    format: 'openapi'
+    value: loadTextContent('./openapi/oai-api-spec-2024-02-01.yaml')
     protocols: [
       'https'
     ]
