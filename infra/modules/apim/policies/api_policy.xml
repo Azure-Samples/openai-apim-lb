@@ -24,7 +24,7 @@
         </choose>
         <!-- Getting OpenAI clusters configuration -->
         <cache-lookup-value key="@("oaClusters" + context.Deployment.Region + context.Api.Revision)" variable-name="oaClusters" />
-        <!-- If we can't find the configuration, it will be loaded -->
+        <!-- If we can't find the configuration cached, it will be loaded -->
         <choose>
             <when condition="@(context.Variables.ContainsKey("oaClusters") == false)">
                 <set-variable name="oaClusters" value="@{

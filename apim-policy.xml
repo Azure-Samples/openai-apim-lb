@@ -6,7 +6,7 @@
         <set-variable name="entra-validate" value="{{entra-auth}}" />
         <choose>
             <when condition="@(context.Variables.GetValueOrDefault("entra-auth") == "true")">
-                 <validate-jwt header-name="Authorization" failed-validation-httpcode="401" failed-validation-error-message="Unauthorized" require-expiration-time="true" require-scheme="Bearer" require-signed-tokens="true">
+                <validate-jwt header-name="Authorization" failed-validation-httpcode="401" failed-validation-error-message="Unauthorized" require-expiration-time="true" require-scheme="Bearer" require-signed-tokens="true">
                     <openid-config url="https://login.microsoftonline.com/{{tenant-id}}/v2.0/.well-known/openid-configuration" />
                     <audiences>
                         <audience>{{audience}}</audience>
@@ -24,24 +24,23 @@
         </choose>
         <!-- Getting OpenAI clusters configuration -->
         <cache-lookup-value key="@("oaClusters" + context.Deployment.Region + context.Api.Revision)" variable-name="oaClusters" />
-        <!-- If we can't find the configuration, it will be loaded -->
+        <!-- If we can't find the configuration cached, it will be loaded -->
         <choose>
             <when condition="@(context.Variables.ContainsKey("oaClusters") == false)">
-                <set-variable name="oaClusters"
-                    value="@{
-                        # route is an Azure OpenAI API endpoints
+                <set-variable name="oaClusters" value="@{
+                        // route is an Azure OpenAI API endpoints
                         JArray routes = new JArray();
-                        # cluster is a group of routes that are capable of serving a specific deployment name (model and version)
+                        // cluster is a group of routes that are capable of serving a specific deployment name (model and version)
                         JArray clusters = new JArray();
-                        # Update the below if condition when using multiple APIM gateway regions/SHGW to get different configuartions for each region
+                        // Update the below if condition when using multiple APIM gateway regions/SHGW to get different configuartions for each region
                         if(context.Deployment.Region == "West Europe" || true)
                         {
-                            # Adding all Azure OpenAI endpoints routes
+                            // Adding all Azure OpenAI endpoints routes (which are set as APIM Backend)
                             routes.Add(new JObject()
                             {
-                                { "name", "REPLACE1" },
-                                { "location", "swedencentral" },
-                                { "url", "https://REPLACE1.openai.azure.com" },
+                                { "name", "EastUS" },
+                                { "location", "eastus" },
+                                { "backend-id", "openai-backend-0" },
                                 { "priority", 1},
                                 { "isThrottling", false }, 
                                 { "retryAfter", DateTime.MinValue } 
@@ -49,43 +48,56 @@
 
                             routes.Add(new JObject()
                             {
-                                { "name", "REPLACE2" },
-                                { "location", "westeurope" },
-                                { "url", "https://REPLACE2.openai.azure.com" },
+                                { "name", "NorthCentralUS" },
+                                { "location", "northcentralus" },
+                                { "backend-id", "openai-backend-1" },
                                 { "priority", 1},
                                 { "isThrottling", false },
                                 { "retryAfter", DateTime.MinValue }
                             });
 
-                            # For each deployment name, create a cluster with the routes that can serve it
-                            # It is important in you OpenAI deployments to use the same name across instances
+                            routes.Add(new JObject()
+                            {
+                                { "name", "EastUS2" },
+                                { "location", "eastus2" },
+                                { "backend-id", "openai-backend-2" },
+                                { "priority", 1},
+                                { "isThrottling", false },
+                                { "retryAfter", DateTime.MinValue }
+                            });
+
+                            // For each deployment name, create a cluster with the routes that can serve it
+                            // It is important in you OpenAI deployments to use the same name across instances
                             clusters.Add(new JObject()
                             {
-                                { "deploymentName", "gpt-35-turbo" },
-                                { "routes", new JArray(routes[0], routes[1]) }
+                                { "deploymentName", "chat" },
+                                { "routes", new JArray(routes[0], routes[1], routes[2]) }
                             });
 
                             clusters.Add(new JObject()
                             {
                                 { "deploymentName", "embedding" },
-                                { "routes", new JArray(routes[0], routes[1]) }
+                                { "routes", new JArray(routes[0], routes[1], routes[2]) }
                             });
 
-                            clusters.Add(new JObject()
-                            {
-                                { "deploymentName", "gpt-4" },
-                                { "routes", new JArray(routes[0]) }
-                            });
+                            //If you want to add additional speical models like DALL-E or GPT-4, you can add them here
+                            //In this cluster, DALL-E is served by one OpenAI endpoint route and GPT-4 is served by two OpenAI endpoint routes
+                            //clusters.Add(new JObject()
+                            //{
+                            //    { "deploymentName", "dall-e-3" },
+                            //    { "routes", new JArray(routes[0]) }
+                            //});
 
-                            clusters.Add(new JObject()
-                            {
-                                { "deploymentName", "dall-e-3" },
-                                { "routes", new JArray(routes[0]) }
-                            });
+                            //clusters.Add(new JObject()
+                            //{
+                            //    { "deploymentName", "gpt-4" },
+                            //    { "routes", new JArray(routes[0], routes[1]) }
+                            //});
+                            
                         }
                         else
                         {
-                            //No clusters found for selected region, either return error (defult behavior) or set default cluster
+                            //No clusters found for selected region, either return error (defult behavior) or set default cluster in the else section
                         }
                         
                         return clusters;   
@@ -99,8 +111,7 @@
         <!-- If we can't find the configuration, it will be loaded -->
         <choose>
             <when condition="@(context.Variables.ContainsKey("routes") == false)">
-                <set-variable name="routes"
-                    value="@{
+                <set-variable name="routes" value="@{
                         string deploymentName = context.Request.MatchedParameters["deployment-id"];
                         JArray clusters = (JArray)context.Variables["oaClusters"];
                         JObject cluster = (JObject)clusters.FirstOrDefault(o => o["deploymentName"]?.Value<string>() == deploymentName);
@@ -122,10 +133,8 @@
                 <choose>
                     <when condition="@(((JArray)context.Variables["routes"]).ToString().Contains("No routes"))">
                         <return-response>
-                            <set-status code="400" reason="No routes"/>
-                            <set-body>
-                                @(((JArray)context.Variables["routes"]).ToString())
-                            </set-body>
+                            <set-status code="400" reason="No routes" />
+                            <set-body>@(((JArray)context.Variables["routes"]).ToString())</set-body>
                         </return-response>
                     </when>
                 </choose>
@@ -135,7 +144,6 @@
         </choose>
         <set-variable name="routeIndex" value="-1" />
         <set-variable name="remainingRoutes" value="1" />
-
         <!-- Backend Managed Identity -->
         <authentication-managed-identity resource="https://cognitiveservices.azure.com" output-token-variable-name="msi-access-token" client-id="{{uami-client-id}}" ignore-error="false" />
         <set-header name="Authorization" exists-action="override">
@@ -166,7 +174,6 @@
             <cache-store-value key="@(context.Request.MatchedParameters["deployment-id"] + "Routes" + context.Deployment.Region + context.Api.Revision)" value="@((JArray)context.Variables["routes"])" duration="86400" />
             <!-- This is the main logic to pick the route to be used -->
             <set-variable name="routeIndex" value="@{
-                    
                     JArray routes = (JArray)context.Variables["routes"];
                     int selectedPriority = Int32.MaxValue;
                     List<int> availableRoutesIndexes = new List<int>();
@@ -208,12 +215,11 @@
                         return 0;    
                     }
                     }" />
-                    
-            <set-variable name="routeUrl" value="@(((JObject)((JArray)context.Variables["routes"])[(Int32)context.Variables["routeIndex"]]).Value<string>("url") + "/openai")" />
+            <set-variable name="backendId" value="@(((JObject)((JArray)context.Variables["routes"])[(Int32)context.Variables["routeIndex"]]).Value<string>("backend-id"))" />
             <set-variable name="routeLocation" value="@(((JObject)((JArray)context.Variables["routes"])[(Int32)context.Variables["routeIndex"]]).Value<string>("location"))" />
             <set-variable name="routeName" value="@(((JObject)((JArray)context.Variables["routes"])[(Int32)context.Variables["routeIndex"]]).Value<string>("name"))" />
             <set-variable name="deploymentName" value="@(context.Request.MatchedParameters["deployment-id"])" />
-            <set-backend-service base-url="@((string)context.Variables["routeUrl"])" />
+            <set-backend-service backend-id="@((string)context.Variables["backendId"])" />
             <forward-request buffer-request-body="true" />
             <choose>
                 <!-- In case we got 429 or 5xx from a route, update the list with its status -->
