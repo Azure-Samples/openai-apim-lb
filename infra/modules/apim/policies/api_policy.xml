@@ -1,52 +1,6 @@
 <policies>
     <inbound>
         <base />
-        <!-- Getting the main variable where we keep the list of backends -->
-        <cache-lookup-value key="listBackends" variable-name="listBackends" />
-        <!-- If we can't find the variable, initialize it -->
-        <choose>
-            <when condition="@(context.Variables.ContainsKey("listBackends") == false)">
-                <set-variable name="listBackends" value="@{
-                    // -------------------------------------------------
-                    // ------- Explanation of backend properties -------
-                    // -------------------------------------------------
-                    // "url":          Your backend url
-                    // "priority":     Lower value means higher priority over other backends. 
-                    //                 If you have more than one Priority 1 backends, they will always be used instead
-                    //                 of Priority 2 or higher. Higher values backends will only be used if your lower values (top priority) are all throttling.
-                    // "isThrottling": Indicates if this endpoint is returning 429 (Too many requests) currently
-                    // "retryAfter":   We use it to know when to mark this endpoint as healthy again after we received a 429 response
-
-                    JArray backends = new JArray();
-                    backends.Add(new JObject()
-                    {
-                        { "backend-id", "openai-backend-0" },
-                        { "priority", 1},
-                        { "isThrottling", false }, 
-                        { "retryAfter", DateTime.MinValue } 
-                    });
-
-                    backends.Add(new JObject()
-                    {
-                        { "backend-id", "openai-backend-1" },
-                        { "priority", 1},
-                        { "isThrottling", false },
-                        { "retryAfter", DateTime.MinValue }
-                    });
-
-                    backends.Add(new JObject()
-                    {
-                        { "backend-id", "openai-backend-2" },
-                        { "priority", 1},
-                        { "isThrottling", false },
-                        { "retryAfter", DateTime.MinValue }
-                    });
-                    return backends;   
-                }" />
-                <!-- And store the variable into cache again -->
-                <cache-store-value key="listBackends" value="@((JArray)context.Variables["listBackends"])" duration="60" />
-            </when>
-        </choose>
         <!-- AAD Authorization -->
         <!-- Enable AAD is named value set to true -->
         <set-variable name="entra-validate" value="{{entra-auth}}" />
@@ -68,6 +22,120 @@
                 </validate-jwt>
             </when>
         </choose>
+        <!-- Getting OpenAI clusters configuration -->
+        <cache-lookup-value key="@("oaClusters" + context.Deployment.Region + context.Api.Revision)" variable-name="oaClusters" />
+        <!-- If we can't find the configuration, it will be loaded -->
+        <choose>
+            <when condition="@(context.Variables.ContainsKey("oaClusters") == false)">
+                <set-variable name="oaClusters"
+                    value="@{
+                        # route is an Azure OpenAI API endpoints
+                        JArray routes = new JArray();
+                        # cluster is a group of routes that are capable of serving a specific deployment name (model and version)
+                        JArray clusters = new JArray();
+                        # Update the below if condition when using multiple APIM gateway regions/SHGW to get different configuartions for each region
+                        if(context.Deployment.Region == "West Europe" || true)
+                        {
+                            # Adding all Azure OpenAI endpoints routes
+                            routes.Add(new JObject()
+                            {
+                                { "name", "REPLACE1" },
+                                { "location", "swedencentral" },
+                                { "url", "https://REPLACE1.openai.azure.com" },
+                                { "priority", 1},
+                                { "isThrottling", false }, 
+                                { "retryAfter", DateTime.MinValue } 
+                            });
+
+                            routes.Add(new JObject()
+                            {
+                                { "name", "REPLACE2" },
+                                { "location", "westeurope" },
+                                { "url", "https://REPLACE2.openai.azure.com" },
+                                { "priority", 1},
+                                { "isThrottling", false },
+                                { "retryAfter", DateTime.MinValue }
+                            });
+
+                            # For each deployment name, create a cluster with the routes that can serve it
+                            # It is important in you OpenAI deployments to use the same name across instances
+                            clusters.Add(new JObject()
+                            {
+                                { "deploymentName", "gpt-35-turbo" },
+                                { "routes", new JArray(routes[0], routes[1]) }
+                            });
+
+                            clusters.Add(new JObject()
+                            {
+                                { "deploymentName", "embedding" },
+                                { "routes", new JArray(routes[0], routes[1]) }
+                            });
+
+                            clusters.Add(new JObject()
+                            {
+                                { "deploymentName", "gpt-4" },
+                                { "routes", new JArray(routes[0]) }
+                            });
+
+                            clusters.Add(new JObject()
+                            {
+                                { "deploymentName", "dall-e-3" },
+                                { "routes", new JArray(routes[0]) }
+                            });
+                        }
+                        else
+                        {
+                            //No clusters found for selected region, either return error (defult behavior) or set default cluster
+                        }
+                        
+                        return clusters;   
+                    }" />
+                <!-- Add cluster configurations to cache -->
+                <cache-store-value key="@("oaClusters" + context.Deployment.Region + context.Api.Revision)" value="@((JArray)context.Variables["oaClusters"])" duration="86400" />
+            </when>
+        </choose>
+        <!-- Getting OpenAI routes configuration based on deployment name, region and api revision -->
+        <cache-lookup-value key="@(context.Request.MatchedParameters["deployment-id"] + "Routes" + context.Deployment.Region + context.Api.Revision)" variable-name="routes" />
+        <!-- If we can't find the configuration, it will be loaded -->
+        <choose>
+            <when condition="@(context.Variables.ContainsKey("routes") == false)">
+                <set-variable name="routes"
+                    value="@{
+                        string deploymentName = context.Request.MatchedParameters["deployment-id"];
+                        JArray clusters = (JArray)context.Variables["oaClusters"];
+                        JObject cluster = (JObject)clusters.FirstOrDefault(o => o["deploymentName"]?.Value<string>() == deploymentName);
+                        if(cluster == null)
+                        {
+                            //Error: No cluster matched the requested deployment name
+                            return new JArray() { new JObject()
+                                {
+                                    { "name", deploymentName },
+                                    { "location", "NA" },
+                                    { "url", "No routes found for the deployment (" + deploymentName + ") in the region (" + context.Deployment.Region + ")" }
+                                }
+                            };
+                        }
+                        JArray routes = (JArray)cluster["routes"];
+                        return routes;
+                    }" />
+                <!-- If no routes found for deployment, return bad request with content of routes variable -->
+                <choose>
+                    <when condition="@(((JArray)context.Variables["routes"]).ToString().Contains("No routes"))">
+                        <return-response>
+                            <set-status code="400" reason="No routes"/>
+                            <set-body>
+                                @(((JArray)context.Variables["routes"]).ToString())
+                            </set-body>
+                        </return-response>
+                    </when>
+                </choose>
+                <!-- Add cluster configurations to cache -->
+                <cache-store-value key="@(context.Request.MatchedParameters["deployment-id"] + "Routes" + context.Deployment.Region + context.Api.Revision)" value="@((JArray)context.Variables["routes"])" duration="86400" />
+            </when>
+        </choose>
+        <set-variable name="routeIndex" value="-1" />
+        <set-variable name="remainingRoutes" value="1" />
+
         <!-- Backend Managed Identity -->
         <authentication-managed-identity resource="https://cognitiveservices.azure.com" output-token-variable-name="msi-access-token" client-id="{{uami-client-id}}" ignore-error="false" />
         <set-header name="Authorization" exists-action="override">
@@ -77,115 +145,119 @@
         <set-variable name="remainingBackends" value="1" />
     </inbound>
     <backend>
-        <retry condition="@(context.Response != null && (context.Response.StatusCode == 429 || context.Response.StatusCode >= 500) && ((Int32)context.Variables["remainingBackends"]) > 0)" count="50" interval="0">
-            <!-- Before picking the backend, let's verify if there is any that should be set to not throttling anymore -->
-            <set-variable name="listBackends" value="@{
-                JArray backends = (JArray)context.Variables["listBackends"];
-
-                for (int i = 0; i < backends.Count; i++)
-                {
-                    JObject backend = (JObject)backends[i];
-
-                    if (backend.Value<bool>("isThrottling") && DateTime.Now >= backend.Value<DateTime>("retryAfter"))
+        <retry condition="@(context.Response != null && (context.Response.StatusCode == 429 || context.Response.StatusCode >= 500) && ((Int32)context.Variables["remainingRoutes"]) > 0)" count="3" interval="0">
+            <!-- Before picking the route, let's verify if there is any that should be set to not throttling anymore -->
+            <set-variable name="routes" value="@{
+                    JArray routes = (JArray)context.Variables["routes"];
+                    
+                    for (int i = 0; i < routes.Count; i++)
                     {
-                        backend["isThrottling"] = false;
-                        backend["retryAfter"] = DateTime.MinValue;
-                    }
-                }
-
-                return backends; 
-            }" />
-            <cache-store-value key="listBackends" value="@((JArray)context.Variables["listBackends"])" duration="60" />
-            <!-- This is the main logic to pick the backend to be used -->
-            <set-variable name="backendIndex" value="@{
-                JArray backends = (JArray)context.Variables["listBackends"];
-
-                int selectedPriority = Int32.MaxValue;
-                List<int> availableBackends = new List<int>();
-
-                for (int i = 0; i < backends.Count; i++)
-                {
-                    JObject backend = (JObject)backends[i];
-
-                    if (!backend.Value<bool>("isThrottling"))
-                    {
-                        int backendPriority = backend.Value<int>("priority");
-
-                        if (backendPriority < selectedPriority)
+                        JObject route = (JObject)routes[i];
+    
+                        if (route.Value<bool>("isThrottling") && DateTime.Now >= route.Value<DateTime>("retryAfter"))
                         {
-                            selectedPriority = backendPriority;
-                            availableBackends.Clear();
-                            availableBackends.Add(i);
-                        } 
-                        else if (backendPriority == selectedPriority)
-                        {
-                            availableBackends.Add(i);
+                            route["isThrottling"] = false;
+                            route["retryAfter"] = DateTime.MinValue;
                         }
                     }
-                }
-
-                if (availableBackends.Count == 1)
-                {
-                    return availableBackends[0];
-                }
-            
-                if (availableBackends.Count > 0)
-                {
-                    //Returns a random backend from the list if we have more than one available with the same priority
-                    return availableBackends[new Random().Next(0, availableBackends.Count)];
-                }
-                else
-                {
-                    //If there are no available backends, the request will be sent to the first one
-                    return 0;    
-                }
+    
+                    return routes; 
                 }" />
-            <set-variable name="backend-id" value="@(((JObject)((JArray)context.Variables["listBackends"])[(Int32)context.Variables["backendIndex"]]).Value<string>("backend-id"))" />
-            <set-backend-service backend-id="@((string)context.Variables["backend-id"])" />
-            <forward-request buffer-request-body="true" />
-            <choose>
-                <!-- In case we got 429 or 5xx from a backend, update the list with its status -->
-                <when condition="@(context.Response != null && (context.Response.StatusCode == 429 || context.Response.StatusCode >= 500) )">
-                    <cache-lookup-value key="listBackends" variable-name="listBackends" />
-                    <set-variable name="listBackends" value="@{
-                        JArray backends = (JArray)context.Variables["listBackends"];
-                        int currentBackendIndex = context.Variables.GetValueOrDefault<int>("backendIndex");
-                        int retryAfter = Convert.ToInt32(context.Response.Headers.GetValueOrDefault("Retry-After", "-1"));
-
-                        if (retryAfter == -1)
+            <cache-store-value key="@(context.Request.MatchedParameters["deployment-id"] + "Routes" + context.Deployment.Region + context.Api.Revision)" value="@((JArray)context.Variables["routes"])" duration="86400" />
+            <!-- This is the main logic to pick the route to be used -->
+            <set-variable name="routeIndex" value="@{
+                    
+                    JArray routes = (JArray)context.Variables["routes"];
+                    int selectedPriority = Int32.MaxValue;
+                    List<int> availableRoutesIndexes = new List<int>();
+    
+                    for (int i = 0; i < routes.Count; i++)
+                    {
+                        JObject route = (JObject)routes[i];
+    
+                        if (!route.Value<bool>("isThrottling"))
                         {
-                            retryAfter = Convert.ToInt32(context.Response.Headers.GetValueOrDefault("x-ratelimit-reset-requests", "-1"));
-                        }
-
-                        if (retryAfter == -1)
-                        {
-                            retryAfter = Convert.ToInt32(context.Response.Headers.GetValueOrDefault("x-ratelimit-reset-tokens", "10"));
-                        }
-
-                        JObject backend = (JObject)backends[currentBackendIndex];
-                        backend["isThrottling"] = true;
-                        backend["retryAfter"] = DateTime.Now.AddSeconds(retryAfter);
-
-                        return backends;      
-                    }" />
-                    <cache-store-value key="listBackends" value="@((JArray)context.Variables["listBackends"])" duration="60" />
-                    <set-variable name="remainingBackends" value="@{
-                        JArray backends = (JArray)context.Variables["listBackends"];
-
-                        int remainingBackends = 0;
-
-                        for (int i = 0; i < backends.Count; i++)
-                        {
-                            JObject backend = (JObject)backends[i];
-
-                            if (!backend.Value<bool>("isThrottling"))
+                            int routePriority = route.Value<int>("priority");
+    
+                            if (routePriority < selectedPriority)
                             {
-                                remainingBackends++;
+                                selectedPriority = routePriority;
+                                availableRoutesIndexes.Clear();
+                                availableRoutesIndexes.Add(i);
+                            } 
+                            else if (routePriority == selectedPriority)
+                            {
+                                availableRoutesIndexes.Add(i);
                             }
                         }
-
-                        return remainingBackends;
+                    }
+    
+                    if (availableRoutesIndexes.Count == 1)
+                    {
+                        return availableRoutesIndexes[0];
+                    }
+                
+                    if (availableRoutesIndexes.Count > 0)
+                    {
+                        //Returns a random route from the list if we have more than one available with the same priority
+                        return availableRoutesIndexes[new Random().Next(0, availableRoutesIndexes.Count)];
+                    }
+                    else
+                    {
+                        //If there are no available routes, the request will be sent to the first one
+                        return 0;    
+                    }
                     }" />
+                    
+            <set-variable name="routeUrl" value="@(((JObject)((JArray)context.Variables["routes"])[(Int32)context.Variables["routeIndex"]]).Value<string>("url") + "/openai")" />
+            <set-variable name="routeLocation" value="@(((JObject)((JArray)context.Variables["routes"])[(Int32)context.Variables["routeIndex"]]).Value<string>("location"))" />
+            <set-variable name="routeName" value="@(((JObject)((JArray)context.Variables["routes"])[(Int32)context.Variables["routeIndex"]]).Value<string>("name"))" />
+            <set-variable name="deploymentName" value="@(context.Request.MatchedParameters["deployment-id"])" />
+            <set-backend-service base-url="@((string)context.Variables["routeUrl"])" />
+            <forward-request buffer-request-body="true" />
+            <choose>
+                <!-- In case we got 429 or 5xx from a route, update the list with its status -->
+                <when condition="@(context.Response != null && (context.Response.StatusCode == 429 || context.Response.StatusCode >= 500) )">
+                    <cache-lookup-value key="@(context.Request.MatchedParameters["deployment-id"] + "Routes" + context.Deployment.Region + context.Api.Revision)" variable-name="routes" />
+                    <set-variable name="routes" value="@{
+                            JArray routes = (JArray)context.Variables["routes"];
+                            int currentrouteIndex = context.Variables.GetValueOrDefault<int>("routeIndex");
+                            int retryAfter = Convert.ToInt32(context.Response.Headers.GetValueOrDefault("Retry-After", "-1"));
+    
+                            if (retryAfter == -1)
+                            {
+                                retryAfter = Convert.ToInt32(context.Response.Headers.GetValueOrDefault("x-ratelimit-reset-requests", "-1"));
+                            }
+    
+                            if (retryAfter == -1)
+                            {
+                                retryAfter = Convert.ToInt32(context.Response.Headers.GetValueOrDefault("x-ratelimit-reset-tokens", "10"));
+                            }
+    
+                            JObject route = (JObject)routes[currentrouteIndex];
+                            route["isThrottling"] = true;
+                            route["retryAfter"] = DateTime.Now.AddSeconds(retryAfter);
+    
+                            return routes;      
+                        }" />
+                    <cache-store-value key="@(context.Request.MatchedParameters["deployment-id"] + "Routes" + context.Deployment.Region + context.Api.Revision)" value="@((JArray)context.Variables["routes"])" duration="86400" />
+                    <set-variable name="remainingRoutes" value="@{
+                            JArray routes = (JArray)context.Variables["routes"];
+    
+                            int remainingRoutes = 0;
+    
+                            for (int i = 0; i < routes.Count; i++)
+                            {
+                                JObject route = (JObject)routes[i];
+    
+                                if (!route.Value<bool>("isThrottling"))
+                                {
+                                    remainingRoutes++;
+                                }
+                            }
+    
+                            return remainingRoutes;
+                        }" />
                 </when>
             </choose>
         </retry>
