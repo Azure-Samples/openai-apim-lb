@@ -6,6 +6,7 @@ languages:
 - xml
 - yaml
 products:
+- azure
 - azure-api-management	
 - azure-openai
 urlFragment: openai-apim-lb
