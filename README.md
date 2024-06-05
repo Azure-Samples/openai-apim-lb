@@ -1,13 +1,20 @@
 ---
 page_type: sample
 languages:
+- azdeveloper
 - bicep
+- python
 - xml
 - yaml
 products:
+- azure
 - azure-api-management	
 - azure-openai
+urlFragment: openai-apim-lb
+name: Smart Load Balancing for OpenAI Endpoints and Azure API Management
+description: A load balancer policy crafted specifically for Azure OpenAI.
 ---
+<!-- YAML front-matter schema: https://review.learn.microsoft.com/en-us/help/contribute/samples/process/onboarding?branch=main#supported-metadata-fields-for-readmemd -->
 
 # :rocket: Smart Load Balancing for OpenAI Endpoints and Azure API Management
 
