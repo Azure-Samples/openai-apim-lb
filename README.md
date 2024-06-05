@@ -9,7 +9,7 @@ products:
 - azure-openai
 urlFragment: openai-apim-lb
 name: Smart Load Balancing for OpenAI Endpoints and Azure API Management
-description: A load balancer policy crafted specifically for Azure OpenAI, which is aware of 'retry-after' headers and intelligently pause traffic when certain OpenAI endpoints reach maximum capacity.
+description: A load balancer policy crafted specifically for Azure OpenAI.
 ---
 <!-- YAML front-matter schema: https://review.learn.microsoft.com/en-us/help/contribute/samples/process/onboarding?branch=main#supported-metadata-fields-for-readmemd -->
 
