@@ -3,6 +3,7 @@ page_type: sample
 languages:
 - azdeveloper
 - bicep
+- python
 - xml
 - yaml
 products:
