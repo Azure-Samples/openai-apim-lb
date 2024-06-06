@@ -2,7 +2,7 @@
     <inbound>
         <base />
         <!-- Getting the main variable where we keep the list of backends -->
-        <cache-lookup-value key="listBackends" variable-name="listBackends" />
+        <cache-lookup-value key="@("listBackends-" + context.Api.Id)" variable-name="listBackends" />
         <!-- If we can't find the variable, initialize it -->
         <choose>
             <when condition="@(context.Variables.ContainsKey("listBackends") == false)">
@@ -44,7 +44,7 @@
                     return backends;   
                 }" />
                 <!-- And store the variable into cache again -->
-                <cache-store-value key="listBackends" value="@((JArray)context.Variables["listBackends"])" duration="60" />
+                <cache-store-value key="@("listBackends-" + context.Api.Id)" value="@((JArray)context.Variables["listBackends"])" duration="60" />
             </when>
         </choose>
         <!-- AAD Authorization -->
@@ -95,7 +95,7 @@
 
                 return backends; 
             }" />
-            <cache-store-value key="listBackends" value="@((JArray)context.Variables["listBackends"])" duration="60" />
+            <cache-store-value key="@("listBackends-" + context.Api.Id)" value="@((JArray)context.Variables["listBackends"])" duration="60" />
             <!-- This is the main logic to pick the backend to be used -->
             <set-variable name="backendIndex" value="@{
                 JArray backends = (JArray)context.Variables["listBackends"];
@@ -146,7 +146,7 @@
             <choose>
                 <!-- In case we got 429 or 5xx from a backend, update the list with its status -->
                 <when condition="@(context.Response != null && (context.Response.StatusCode == 429 || context.Response.StatusCode >= 500) )">
-                    <cache-lookup-value key="listBackends" variable-name="listBackends" />
+                    <cache-lookup-value key="@("listBackends-" + context.Api.Id)" variable-name="listBackends" />
                     <set-variable name="listBackends" value="@{
                         JArray backends = (JArray)context.Variables["listBackends"];
                         int currentBackendIndex = context.Variables.GetValueOrDefault<int>("backendIndex");
@@ -168,7 +168,7 @@
 
                         return backends;      
                     }" />
-                    <cache-store-value key="listBackends" value="@((JArray)context.Variables["listBackends"])" duration="60" />
+                    <cache-store-value key="@("listBackends-" + context.Api.Id)" value="@((JArray)context.Variables["listBackends"])" duration="60" />
                     <set-variable name="remainingBackends" value="@{
                         JArray backends = (JArray)context.Variables["listBackends"];
 
