@@ -92,7 +92,7 @@ Before every call to OpenAI, the policy checks if any backends can be marked as 
 This code segment is triggered when a 429 or 5xx error occurs, updating the backend status accordingly based on the "Retry-After" header. 
 ```xml
 <when condition="@(context.Response != null && (context.Response.StatusCode == 429 || context.Response.StatusCode.ToString().StartsWith("5")) )">
-    <cache-lookup-value key="listBackends" variable-name="listBackends" />
+    <cache-lookup-value key="@("listBackends-" + context.Api.Id)" variable-name="listBackends" />
     <set-variable name="listBackends" value="@{
         JArray backends = (JArray)context.Variables["listBackends"];
         int currentBackendIndex = context.Variables.GetValueOrDefault<int>("backendIndex");
