@@ -1,6 +1,6 @@
 # Python Sample Code for Using Azure OpenAI with API Management
 
-This Python sample demonstrates how to use the Azure OpenAI SDK to interact with an Azure API Management endpoint. The code snippet below outlines the process of initializing the Azure OpenAI client and making a request to generate a response based on the model deployed in your Azure OpenAI service.
+This Python sample demonstrates how to use the Azure OpenAI SDK to interact with an Azure API Management endpoint. The code snippet below outlines the process of initializing the Azure OpenAI client and making a request to generate a response based on the model deployed in your Azure OpenAI Service.
 
 ## Sample Code
 
@@ -33,13 +33,13 @@ print(response)
    - Replace `<your subscription key>` with your Azure API Management subscription key.
 
 3. **API Version**:
-   - The `api_version` is set to `"2023-12-01-preview"`. Ensure this matches the version deployed in your Azure OpenAI service.
+   - The `api_version` is set to `"2023-12-01-preview"`. Ensure this matches the version deployed in your Azure OpenAI Service.
 
 4. **Model Specification**:
-   - Replace `<your_deployment_name>` with the name of the model you have deployed in Azure OpenAI service.
+   - Replace `<your_deployment_name>` with the name of the model you have deployed in Azure OpenAI Service.
 
 5. **Running the Code**:
-   - Execute this script to interact with the Azure OpenAI service through the configured API Management endpoint.
+   - Execute this script to interact with the Azure OpenAI Service through the configured API Management endpoint.
    - The script sends a predefined message and prints the response from the OpenAI model.
 
 ```bash
