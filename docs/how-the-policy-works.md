@@ -4,7 +4,7 @@ This guide provides insights into customizing API Management policies to enable 
 
 ### Understanding `listBackends` Variable Configuration
 
-The `listBackends` variable is crucial as it defines the backends and their priorities. This example demonstrates setting up various endpoints with priorities and throttling status. 
+The `listBackends` variable is crucial as it defines the backends and their priorities. This example demonstrates setting up various endpoints with priorities and throttling status.
 
 ```xml
 <set-variable name="listBackends" value="@{
@@ -57,7 +57,8 @@ The `listBackends` variable is crucial as it defines the backends and their prio
 
 ### Authentication Managed Identity
 
-This section of the policy injects the Azure Managed Identity from your API Management instance as an HTTP header for OpenAI. This method is recommended for ease of API key management across different backends. 
+This section of the policy injects the Azure Managed Identity from your API Management instance as an HTTP header for OpenAI. This method is recommended for ease of API key management across different backends.
+
 ```xml
 <authentication-managed-identity resource="https://cognitiveservices.azure.com" output-token-variable-name="msi-access-token" ignore-error="false" />
 <set-header name="Authorization" exists-action="override">
@@ -68,6 +69,7 @@ This section of the policy injects the Azure Managed Identity from your API Mana
 ### Backend Health Check
 
 Before every call to OpenAI, the policy checks if any backends can be marked as healthy after the specified "Retry-After" period.
+
 ```xml
 <set-variable name="listBackends" value="@{
     JArray backends = (JArray)context.Variables["listBackends"];
@@ -90,6 +92,7 @@ Before every call to OpenAI, the policy checks if any backends can be marked as 
 ### Handling 401, 429, and 5xx Errors
 
 This code segment is triggered when a 401, 429, or 5xx error occurs, updating the backend status accordingly based on the "Retry-After" header.
+
 ```xml
 <when condition="@(context.Response != null && (context.Response.StatusCode == 401 || context.Response.StatusCode == 429 || context.Response.StatusCode.ToString().StartsWith("5")) )">
     <cache-lookup-value key="@("listBackends-" + context.Api.Id)" variable-name="listBackends" />
