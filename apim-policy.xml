@@ -96,7 +96,7 @@
         <set-variable name="remainingBackends" value="1" />
     </inbound>
     <backend>
-        <retry condition="@(context.Response != null && (context.Response.StatusCode == 429 || context.Response.StatusCode >= 500) && ((Int32)context.Variables["remainingBackends"]) > 0)" count="50" interval="0">
+        <retry condition="@(context.Response != null && (context.Response.StatusCode == 401 || context.Response.StatusCode == 429 || context.Response.StatusCode >= 500) && ((Int32)context.Variables["remainingBackends"]) > 0)" count="50" interval="0">
             <!-- Before picking the backend, let's verify if there is any that should be set to not throttling anymore -->
             <set-variable name="listBackends" value="@{
                 JArray backends = (JArray)context.Variables["listBackends"];
@@ -163,8 +163,8 @@
             <set-backend-service base-url="@((string)context.Variables["backendUrl"])" />
             <forward-request buffer-request-body="true" />
             <choose>
-                <!-- In case we got 429 or 5xx from a backend, update the list with its status -->
-                <when condition="@(context.Response != null && (context.Response.StatusCode == 429 || context.Response.StatusCode >= 500) )">
+                <!-- In case we got a 401, 429, or 5xx from a backend, update the list with its status -->
+                <when condition="@(context.Response != null && (context.Response.StatusCode == 401 || context.Response.StatusCode == 429 || context.Response.StatusCode >= 500) )">
                     <cache-lookup-value key="@("listBackends-" + context.Api.Id)" variable-name="listBackends" />
                     <set-variable name="listBackends" value="@{
                         JArray backends = (JArray)context.Variables["listBackends"];

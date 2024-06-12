@@ -87,11 +87,11 @@ Before every call to OpenAI, the policy checks if any backends can be marked as 
 }" />
 ```
 
-### Handling 429 and 5xx Errors
+### Handling 401, 429, and 5xx Errors
 
-This code segment is triggered when a 429 or 5xx error occurs, updating the backend status accordingly based on the "Retry-After" header. 
+This code segment is triggered when a 401, 429, or 5xx error occurs, updating the backend status accordingly based on the "Retry-After" header.
 ```xml
-<when condition="@(context.Response != null && (context.Response.StatusCode == 429 || context.Response.StatusCode.ToString().StartsWith("5")) )">
+<when condition="@(context.Response != null && (context.Response.StatusCode == 401 || context.Response.StatusCode == 429 || context.Response.StatusCode.ToString().StartsWith("5")) )">
     <cache-lookup-value key="@("listBackends-" + context.Api.Id)" variable-name="listBackends" />
     <set-variable name="listBackends" value="@{
         JArray backends = (JArray)context.Variables["listBackends"];
