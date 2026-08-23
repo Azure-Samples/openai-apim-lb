@@ -1,3 +1,7 @@
+> **Repository archival notice**
+>
+> This sample is scheduled for archival. For current API Management samples, see [https://github.com/Azure-Samples/AI-Gateway](https://github.com/Azure-Samples/AI-Gateway).
+>
 ---
 page_type: sample
 languages:
